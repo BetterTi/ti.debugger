@@ -15,25 +15,25 @@ public class TestSystem {
   @Test
   public void test() throws IOException, InterruptedException {
 
-    TitaniumAndroidDebugger debugger = new TitaniumAndroidDebugger();
-    ProcessBuilder b = new ProcessBuilder();
-    b.command("node", "C:\\Program Files\\nodejs\\node_modules\\titanium\\bin\\titanium", "build", "-p", "android", "-T", "device", "--skip-js-minify");
-    b.directory(new File("testprojects/KitchenSink"));
-
-//    Process p = b.connect();
-
-
-
-
-
-    debugger.connect();
-
-    debugger.resume();
-    debugger.addBreakpoint(Paths.get("app.js"), 130);
-
-
-
-    while(true){Thread.sleep(100);}
+//    TitaniumAndroidDebugger debugger = new TitaniumAndroidDebugger();
+//    ProcessBuilder b = new ProcessBuilder();
+//    b.command("node", "C:\\Program Files\\nodejs\\node_modules\\titanium\\bin\\titanium", "build", "-p", "android", "-T", "device", "--skip-js-minify");
+//    b.directory(new File("testprojects/KitchenSink"));
+//
+////    Process p = b.connect();
+//
+//
+//
+//
+//
+//    debugger.connect();
+//
+//    debugger.resume();
+//    debugger.addBreakpoint(Paths.get("app.js"), 130);
+//
+//
+//
+//    while(true){Thread.sleep(100);}
 
 
   }
