@@ -10,7 +10,10 @@ group = 'com.github.betterti'
 archivesBaseName = 'ti-debugger'
 version = '0.0.0-SNAPSHOT'
 
-
+ext{
+    deployUsername = hasProperty("ossrhUsername") ? ossrhUsername : System.getenv("ossrhUsername")
+    deployPassword = hasProperty("ossrhPassword") ? ossrhPassword : System.getenv("ossrhPassword")
+}
 
 repositories{
     mavenCentral()
@@ -51,11 +54,11 @@ uploadArchives {
             beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
 
             repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
-                authentication(userName: ossrhUsername, password: ossrhPassword)
+                authentication(userName: deployUsername, password: deployPassword)
             }
 
             snapshotRepository(url: "https://oss.sonatype.org/content/repositories/snapshots/") {
-                authentication(userName: ossrhUsername, password: ossrhPassword)
+                authentication(userName: deployUsername, password: deployPassword)
             }
 
             pom.project {
