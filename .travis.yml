@@ -1,14 +1,16 @@
 language: java
 jdk:
-  - oraclejdk8
-script:  echo $TRAVIS_BRANCH; ./gradlew build
+- oraclejdk8
+script: "./gradlew build"
 before_cache:
-  - rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
-  - rm -fr $HOME/.gradle/caches/*/plugin-resolution/
+- rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
+- rm -fr $HOME/.gradle/caches/*/plugin-resolution/
 cache:
   directories:
-    - $HOME/.gradle/caches/
-    - $HOME/.gradle/wrapper/
+  - "$HOME/.gradle/caches/"
+  - "$HOME/.gradle/wrapper/"
 notifications:
   email:
-    - baj306@gmail.com
+  - baj306@gmail.com
+r:
+  secure: y3G03YM/CK8LhAHawjTzj3kM73TZhnn4FVeTHOO6P4kqYwoHe8pkXOJBtMfyo8wqtYkWjQGl1xK7tNuC+EiaRoUm9i3uZQClMck+V6kayng98YHPjsVNEwHZR03i88su65aPIEJYoBckjK1dwJw9SClG0IW03TGJaFwQeLYEQne6H+FEFmaEPp7eYcRm3FJyptpCc1/Chb66PdiVXEJWP5MEfUVh8HH7IK/ZhE5ZOBUf9dQhkb+jcLRUoHowv6QdArHbIi5HtXuzY1H/mNmOSakM1KEGIN4a1XbXGxirVsAwy3kpXXn2A0Tlj3kLpTyD0rZIwQTPK9Vig0QXpm6I+f52pL1Gj/vjQnWewnWT2lXRN6si/5qaKzVZxQ1W0t1K6qID2rDk9Cl4Ng0XBb8Jwef0Ynl11tTHBZOFfA8TK/oZ+yeMVf0Rr/myoMA0JfFW7bfDxX8qWJihbZesW5GtHzmtxuJqWtZt9oVQKD1QrEun8Nhxxs21wIF2AwBSjldJT4vPdu97yTLlVbFUPxeNOJwOp57EUR0h2JsMv1L5TnWZk1bcpdjbPXj8pSi8nwJIfa4REexb2YIpHnNNGqeUfnhI7VtDe8HkM0Qi0mj5yQG2txN7oruEX1Ufs5Lbc6VT+F8GkmMIHDwJOKrTOZ2H+dA7irGFRdGhrTnAnozSaIo=
