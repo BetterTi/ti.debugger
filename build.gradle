@@ -15,6 +15,13 @@ ext{
     deployPassword = hasProperty("ossrhPassword") ? ossrhPassword : System.getenv("ossrhPassword")
 }
 
+if(!signing.keyId){
+    signing.keyId = System.getenv("GPG_KEYNAME")
+    signing.password = System.getenv("GPG_PASSPHRASE")
+    signing.secretKeyRingFile="deploy/secring.gpg.enc"
+}
+
+
 repositories{
     mavenCentral()
 }
