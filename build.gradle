@@ -13,8 +13,8 @@ version = '0.0.0-SNAPSHOT'
 ext{
 
 
-    if(!getProperty("signing.keyId"))    setProperty("signing.keyId", System.getenv("GPG_KEYNAME"));
-    if(!getProperty("signing.password")) setProperty("signing.password", System.getenv("GPG_PASSPHRASE"));
+    if(!project.hasProperty("signing.keyId"))    project.setProperty("signing.keyId", System.getenv("GPG_KEYNAME"));
+    if(!project.hasProperty("signing.password")) project.setProperty("signing.password", System.getenv("GPG_PASSPHRASE"));
     secretKeyRingFile = "deploy/secring.gpg.enc"
 
     deployUsername = hasProperty("ossrhUsername") ? ossrhUsername : System.getenv("ossrhUsername")
