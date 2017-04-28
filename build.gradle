@@ -21,9 +21,11 @@ ext{
 
 gradle.taskGraph.whenReady { taskGraph ->
     if(System.getenv("GPG_KEYNAME"))  {
+        println "Configuring GPG KEY NAME"
         ext."signing.keyId" = System.getenv("GPG_KEYNAME");
     }
     if(System.getenv("GPG_PASSPHRASE")) {
+        println "Configuring GPG Passphse"
         ext."signing.password"= System.getenv("GPG_PASSPHRASE");
     }
 
@@ -32,6 +34,7 @@ gradle.taskGraph.whenReady { taskGraph ->
         ["openssl", "enc", "-in", "secring.gpg.enc", "-out", "secring.gpg.out", "-d", "-aes256", "-k", System.getenv("SECRET_KEY_PASSWORD")].execute().waitFor();
        ext."signing.secretKeyRingFile" = "secring.gpg.out"
     }
+
 
 }
 
