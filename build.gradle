@@ -13,22 +13,29 @@ version = '0.0.0-SNAPSHOT'
 ext{
 
 
-    if(System.getenv("GPG_KEYNAME"))  {
-        project.setProperty("signing.keyId", System.getenv("GPG_KEYNAME"))
-    }
-    if(System.getenv("GPG_PASSPHRASE")) {
-        project.setProperty("signing.password", System.getenv("GPG_PASSPHRASE"))
-    };
-
-    if(System.getenv("SECRET_KEY_PASSWORD")){
-        println "Decrypting secret key for signing"
-        ["openssl", "enc", "-in", "secring.gpg.enc", "-out", "secring.gpg.out", "-d", "-aes256", "-k", System.getenv("SECRET_KEY_PASSWORD")].execute().waitFor();
-        project.setProperty("signing.secretKeyRingFile", "secring.gpg.out")
-    }
 
     deployUsername = hasProperty("ossrhUsername") ? ossrhUsername : System.getenv("ossrhUsername")
     deployPassword = hasProperty("ossrhPassword") ? ossrhPassword : System.getenv("ossrhPassword")
 }
+
+
+gradle.taskGraph.whenReady { taskGraph ->
+    if(System.getenv("GPG_KEYNAME"))  {
+        ext."signing.keyId" = System.getenv("GPG_KEYNAME");
+    }
+    if(System.getenv("GPG_PASSPHRASE")) {
+        ext."signing.password"= System.getenv("GPG_PASSPHRASE");
+    }
+
+    if(System.getenv("SECRET_KEY_PASSWORD")){
+        println "Decrypting secret key for signing"
+        ["openssl", "enc", "-in", "secring.gpg.enc", "-out", "secring.gpg.out", "-d", "-aes256", "-k", System.getenv("SECRET_KEY_PASSWORD")].execute().waitFor();
+       ext."signing.secretKeyRingFile" = "secring.gpg.out"
+    }
+
+}
+
+
 
 //if(System.getenv("GPG_KEYNAME")) {
 //    signing {
