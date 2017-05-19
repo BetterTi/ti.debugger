@@ -3,6 +3,8 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/ti.debugger.iml" filepath="$PROJECT_DIR$/ti.debugger.iml" />
+      <module fileurl="file://$PROJECT_DIR$/ti.debugger.cli/ti.debugger.cli.iml" filepath="$PROJECT_DIR$/ti.debugger.cli/ti.debugger.cli.iml" />
+      <module fileurl="file://$PROJECT_DIR$/ti.debugger.lib/ti.debugger.lib.iml" filepath="$PROJECT_DIR$/ti.debugger.lib/ti.debugger.lib.iml" />
     </modules>
   </component>
 </project>
