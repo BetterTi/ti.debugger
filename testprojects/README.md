@@ -1,0 +1,1 @@
+Test projects. You should be able to run android.bat or ios.bat to start the app properly

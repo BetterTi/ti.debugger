@@ -2,29 +2,31 @@ package org.betterti.titanium.debugger.api;
 
 import org.betterti.titanium.debugger.RequestCallback;
 
+import java.io.IOException;
 import java.nio.file.Path;
+import java.util.concurrent.Future;
 
 public interface TitaniumDebugger {
 	void onPause(PauseEvent callback);
 
-	void connect();
+	void connect() throws IOException;
 
 	void stop(ShutdownCallback shutdownCallback);
 
 	void initialize();
 
 
-	void addBreakpoint(Path relative, int lineNo);
+	Future setBreakpoint(Path relative, int lineNo);
 
 	void removeBreakpoint(Path relative, int lineNo);
 
-	void stepOver();
+	Future stepOver();
 
-	void stepInto();
+	Future stepInto();
 
-	void stepReturn();
+	Future stepReturn();
 
-	void resume();
+	Future resume();
 
 	void fetchFrames(FramesCallback callback);
 

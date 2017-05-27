@@ -1,9 +1,8 @@
 package org.betterti.titanium.debugger;
 
-import org.betterti.titanium.debugger.android.AndroidDebugCommands;
+import org.betterti.titanium.debugger.android.AndroidDebugCommand;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import sun.rmi.runtime.Log;
 
 import java.io.*;
 import java.net.ServerSocket;
@@ -17,7 +16,7 @@ public class TitaniumIOSDebugger {
 
 	private final ExecutorService _debuggerExecutor = Executors.newFixedThreadPool(3);
 	private Socket _debugSocket;
-	private BlockingQueue<AndroidDebugCommands> _commandQueue = new LinkedBlockingQueue<AndroidDebugCommands>();
+	private BlockingQueue<AndroidDebugCommand> _commandQueue = new LinkedBlockingQueue<AndroidDebugCommand>();
 	private static final Logger Log = LoggerFactory.getLogger(TitaniumIOSDebugger.class);
 	private SubmittedRequest currentRequest = null;
 
@@ -41,13 +40,13 @@ public class TitaniumIOSDebugger {
 	private void sendCommand(String command){
 
 		Log.debug("Queuing: " + command);
-		_commandQueue.add(new AndroidDebugCommands(null, command, false));
+		_commandQueue.add(new AndroidDebugCommand(null, command, false));
 	}
 
 	private void sendCommand(String command, boolean fireAndForget){
 
 		Log.debug("Queuing: " + command);
-		_commandQueue.add(new AndroidDebugCommands(null, command, fireAndForget));
+		_commandQueue.add(new AndroidDebugCommand(null, command, fireAndForget));
 	}
 
 	private void sendCommand(String command, RequestCallback callback){

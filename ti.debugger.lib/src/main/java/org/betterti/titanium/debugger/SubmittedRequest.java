@@ -1,24 +1,42 @@
 package org.betterti.titanium.debugger;
 
 
-import org.betterti.titanium.debugger.android.AndroidDebugCommands;
+import com.google.gson.Gson;
+import org.betterti.titanium.debugger.android.AndroidDebugCommand;
 
-import java.util.concurrent.CountDownLatch;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.*;
 
 public class SubmittedRequest {
 	public final String command;
-	public CountDownLatch waiting = new CountDownLatch(1);
+	private final CountDownLatch _latch = new CountDownLatch(1);
 	public long requestId = System.currentTimeMillis();
 
-	public final AndroidDebugCommands.Callback callback;
+	public final AndroidDebugCommand.Callback callback;
+	private AndroidDebugCommand _pending;
 
-	public SubmittedRequest(AndroidDebugCommands pending) {
-		this.command = pending.command;
+	public SubmittedRequest(AndroidDebugCommand pending) {
+		_pending = pending;
 		this.callback = pending.callback;
+		Map content = new HashMap();
+		content.put("seq", requestId);
+		content.put("type", "request");
+		content.put("command", pending.command);
+		if(pending.getArgs() != null){
+			content.put("arguments", pending.getArgs());
+		}
+		final String s = new Gson().toJson(content);
+		this.command = "Content-Length:" + s.length() + "\r\n\r\n" + s;
 	}
 
 	public String getSerializedCommand(){
-		final String s = requestId + "*" + command;
-		return s.length() + "*" + s;
+		return this.command;
 	}
+
+	public AndroidDebugCommand getCommand(){
+		return _pending;
+	}
+
+
 }

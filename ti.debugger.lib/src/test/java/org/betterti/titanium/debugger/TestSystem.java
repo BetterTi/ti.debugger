@@ -60,7 +60,7 @@ public class TestSystem {
     debugger.connect();
 
     debugger.resume();
-    debugger.addBreakpoint(Paths.get("app.js"), 130);
+    debugger.setBreakpoint(Paths.get("app.js"), 130);
 //
 //
 //

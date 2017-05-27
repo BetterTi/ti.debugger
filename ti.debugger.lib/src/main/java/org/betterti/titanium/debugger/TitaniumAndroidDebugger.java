@@ -1,7 +1,7 @@
 package org.betterti.titanium.debugger;
 
 import org.betterti.titanium.debugger.android.AndroidDataQueue;
-import org.betterti.titanium.debugger.android.AndroidDebugCommands;
+import org.betterti.titanium.debugger.android.AndroidDebugCommand;
 import org.betterti.titanium.debugger.api.FramesCallback;
 import org.betterti.titanium.debugger.api.PauseEvent;
 import org.betterti.titanium.debugger.api.ShutdownCallback;
@@ -9,14 +9,13 @@ import org.betterti.titanium.debugger.api.TitaniumDebugger;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Future;
 
 public class TitaniumAndroidDebugger implements TitaniumDebugger {
 
@@ -34,45 +33,51 @@ public class TitaniumAndroidDebugger implements TitaniumDebugger {
 
 	private AndroidDataQueue _queue = new AndroidDataQueue();
 
-	public TitaniumAndroidDebugger(){
+	public TitaniumAndroidDebugger(){}
 
+	public interface EventCallbacks{
+
+		class PauseEvent{
+			public String filename;
+			public int line;
+			public PauseEvent(String filename, int lineCount) {
+				this.filename = filename;
+				this.line = lineCount;
+			}
+		}
+
+		void onPause(PauseEvent e);
 	}
-
-
-
-	public interface EventCallback{
-		void event(Map eventData);
-	}
-
-	public interface BreakpointCallback{
-		void event(Map breakpointData);
-	}
-
 
 	@Override
 	public void onPause(final PauseEvent callback){
-		_queue.on("break", new EventCallback() {
-			@Override
-			public void event(Map eventData) {
-				Log.warn("PAUSE RECEIVED");
-				callback.paused(((Map)eventData.get("script")).get("name").toString(), ((Number)eventData.get("sourceLine")).intValue());
-			}
-		});
 	}
 
 
 
-	private void send(AndroidDebugCommands request){
+	private Future send(AndroidDebugCommand request){
 		_queue.send(request);
+		return request;
 	}
 
 
 	@Override
-	public void connect(){
-		_queue.start();
+	public void connect() throws IOException {
+		_queue.startSocket();
     initialize();
 	}
 
+
+	public void setEventListener(EventCallbacks callbacks){
+		_queue.on("break", new AndroidDataQueue.EventCallback() {
+			@Override
+			public void event(Map body) {
+				Map s = (Map) body.get("script");
+				EventCallbacks.PauseEvent e = new EventCallbacks.PauseEvent((String)s.get("name"), ((Number) body.get("sourceLine")).intValue());
+				callbacks.onPause(e);
+			}
+		});
+	}
 
 	@Override
 	public void stop(ShutdownCallback shutdownCallback) {
@@ -81,7 +86,7 @@ public class TitaniumAndroidDebugger implements TitaniumDebugger {
 
 	@Override
 	public void initialize() {
-		send(AndroidDebugCommands.version(new AndroidDebugCommands.Callback() {
+		send(AndroidDebugCommand.version(new AndroidDebugCommand.Callback() {
 			@Override
 			public void event(Map response) {
 				Log.warn("Versions response: " + response);
@@ -90,8 +95,8 @@ public class TitaniumAndroidDebugger implements TitaniumDebugger {
 	}
 
 	@Override
-	public void addBreakpoint(Path relative, int lineNo) {
-		send(AndroidDebugCommands.createBreakpoint(relative, lineNo, new AndroidDebugCommands.Callback(){
+	public Future setBreakpoint(Path relative, int lineNo) {
+		return send(AndroidDebugCommand.createBreakpoint(relative, lineNo, new AndroidDebugCommand.Callback(){
 			public void event(Map map){
 				Map body = (Map) map.get("body");
 				long breakpointId = ((Number)body.get("breakpoint")).longValue();
@@ -113,7 +118,7 @@ public class TitaniumAndroidDebugger implements TitaniumDebugger {
 		while(i.hasNext()){
 			BreakpointRegistry reg = i.next();
 			if(reg.line == lineNo && reg.file.equals(relative.toString())){
-				send(AndroidDebugCommands.deleteBreakpoint(reg.id));
+				send(AndroidDebugCommand.deleteBreakpoint(reg.id));
 				i.remove();
 				found = true;
 			}
@@ -124,30 +129,36 @@ public class TitaniumAndroidDebugger implements TitaniumDebugger {
 
 	}
 
+	public Future disconnect() {
+		return send(AndroidDebugCommand.disconnect(null));
+	}
+
+
+
 	@Override
-	public void stepOver() {
-		send(AndroidDebugCommands.stepOver());
+	public Future stepOver() {
+		return send(AndroidDebugCommand.stepOver());
 	}
 
 	@Override
-	public void stepInto() {
-		send(AndroidDebugCommands.stepInto());
+	public Future stepInto() {
+		return send(AndroidDebugCommand.stepInto());
 	}
 
 	@Override
-	public void stepReturn() {
-		send(AndroidDebugCommands.stepReturn());
+	public Future stepReturn() {
+		return send(AndroidDebugCommand.stepReturn());
 	}
 
 	@Override
-	public void resume() {
-		send(AndroidDebugCommands.resume(null));
+	public Future resume() {
+		return send(AndroidDebugCommand.resume(null));
 
 	}
 
 	@Override
 	public void fetchFrames(FramesCallback callback) {
-		send(AndroidDebugCommands.fetchFrames(callback));
+		send(AndroidDebugCommand.fetchFrames(callback));
 	}
 
 	@Override

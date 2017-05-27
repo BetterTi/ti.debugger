@@ -8,22 +8,25 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.*;
 
-public class AndroidDebugCommands {
+public class AndroidDebugCommand implements Future {
 	public final Callback callback;
 	public final String command;
 	public final boolean fireAndForget;
 
+	private CountDownLatch _latch = new CountDownLatch(1);
+
 	public Map<String, Object> args;
 
-	public AndroidDebugCommands(Callback callback, String command, boolean fireAndForget) {
+	public AndroidDebugCommand(Callback callback, String command, boolean fireAndForget) {
 		this.callback = callback;
 		this.command = command;
 		this.fireAndForget = fireAndForget;
 	}
 
-	public static AndroidDebugCommands fetchFrames(final FramesCallback callback) {
-		return new AndroidDebugCommands(new Callback() {
+	public static AndroidDebugCommand fetchFrames(final FramesCallback callback) {
+		return new AndroidDebugCommand(new Callback() {
 			@Override
 			public void event(Map response) {
 				Map body = getObj(response, "body");
@@ -68,13 +71,13 @@ public class AndroidDebugCommands {
 		}, "backtrace", false);
 	}
 
-	public static AndroidDebugCommands disconnect(Callback cb) {
-		return new AndroidDebugCommands(cb, "disconnect", false);
+	public static AndroidDebugCommand disconnect(Callback cb) {
+		return new AndroidDebugCommand(cb, "disconnect", false);
 	}
 
-	public static AndroidDebugCommands halt(Callback callback) {
+	public static AndroidDebugCommand halt(Callback callback) {
 		String command = "evaluate";
-		final AndroidDebugCommands pending = new AndroidDebugCommands(callback, command, true);
+		final AndroidDebugCommand pending = new AndroidDebugCommand(callback, command, true);
 		final HashMap<String, Object> map = new HashMap<String, Object>();
 		map.put("disable_break", true);
 		map.put("expression", "Ti.API.terminate()");
@@ -84,7 +87,7 @@ public class AndroidDebugCommands {
 		return pending;
 	}
 
-	public static AndroidDebugCommands stepOver() {
+	public static AndroidDebugCommand stepOver() {
 		/*
 		{ "seq"       : <number>,
   "type"      : "request",
@@ -94,25 +97,28 @@ public class AndroidDebugCommands {
                 }
 }
 		 */
-		AndroidDebugCommands pending = new AndroidDebugCommands(null, "continue", true);
+		AndroidDebugCommand pending = new AndroidDebugCommand(null, "continue", true);
 		final HashMap<String, Object> map = new HashMap<String, Object>();
 		map.put("stepaction", "next");
+		map.put("stepcount", "1");
 		pending.setArgs(map);
 		return pending;
 	}
 
-	public static AndroidDebugCommands stepInto() {
-		AndroidDebugCommands pending = new AndroidDebugCommands(null, "continue", true);
+	public static AndroidDebugCommand stepInto() {
+		AndroidDebugCommand pending = new AndroidDebugCommand(null, "continue", true);
 		final HashMap<String, Object> map = new HashMap<String, Object>();
 		map.put("stepaction", "in");
+		map.put("stepcount", "1");
 		pending.setArgs(map);
 		return pending;
 	}
 
-	public static AndroidDebugCommands stepReturn() {
-		AndroidDebugCommands pending = new AndroidDebugCommands(null, "continue", true);
+	public static AndroidDebugCommand stepReturn() {
+		AndroidDebugCommand pending = new AndroidDebugCommand(null, "continue", true);
 		final HashMap<String, Object> map = new HashMap<String, Object>();
 		map.put("stepaction", "out");
+		map.put("stepcount", "1");
 		pending.setArgs(map);
 		return pending;
 	}
@@ -126,14 +132,14 @@ public class AndroidDebugCommands {
 		this.args = args;
 	}
 
-	public static AndroidDebugCommands version(Callback callback) {
-		return new AndroidDebugCommands(callback, "version", false);
+	public static AndroidDebugCommand version(Callback callback) {
+		return new AndroidDebugCommand(callback, "version", false);
 	}
 
-	public static AndroidDebugCommands createBreakpoint(final Path relative, final int lineNo, Callback callback) {
+	public static AndroidDebugCommand createBreakpoint(final Path relative, final int lineNo, Callback callback) {
 
 		String command = "setbreakpoint";
-		final AndroidDebugCommands pending = new AndroidDebugCommands(callback, command, false);
+		final AndroidDebugCommand pending = new AndroidDebugCommand(callback, command, false);
 		final HashMap<String, Object> map = new HashMap<String, Object>();
 		map.put("type", "script");
 		map.put("target", relative.toString());
@@ -144,16 +150,16 @@ public class AndroidDebugCommands {
 		return pending;
 	}
 
-	public static AndroidDebugCommands deleteBreakpoint(long breakpointId) {
-		final AndroidDebugCommands p = new AndroidDebugCommands(null, "clearbreakpoint", false);
+	public static AndroidDebugCommand deleteBreakpoint(long breakpointId) {
+		final AndroidDebugCommand p = new AndroidDebugCommand(null, "clearbreakpoint", false);
 		Map args = new HashMap();
 		args.put("breakpoint", breakpointId);
 		p.setArgs(args);
 		return p;
 	}
 
-	public static AndroidDebugCommands resume(Callback callback) {
-		return new AndroidDebugCommands(callback, "continue", false);
+	public static AndroidDebugCommand resume(Callback callback) {
+		return new AndroidDebugCommand(callback, "continue", false);
 	}
 
 	public Map<String, Object> getArgs() {
@@ -167,5 +173,34 @@ public class AndroidDebugCommands {
 
 	private static Number getNum(Map frame, String line) {
 		return (Number) frame.get(line);
+	}
+
+	@Override
+	public boolean cancel(boolean mayInterruptIfRunning) {
+		return false;
+	}
+
+	@Override
+	public boolean isCancelled() {
+		return false;
+	}
+
+	@Override
+	public boolean isDone() {
+		return _latch.getCount() == 0;
+	}
+
+	@Override
+	public Object get() throws InterruptedException, ExecutionException {
+		_latch.await(); return null;
+	}
+
+	@Override
+	public Object get(long timeout, TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
+		return _latch.await(timeout, unit);
+	}
+
+	public void finish(){
+		_latch.countDown();
 	}
 }
