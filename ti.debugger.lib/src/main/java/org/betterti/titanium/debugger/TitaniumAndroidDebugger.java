@@ -35,21 +35,7 @@ public class TitaniumAndroidDebugger implements TitaniumDebugger {
 
 	public TitaniumAndroidDebugger(){}
 
-	public interface EventCallbacks{
-
-		class PauseEvent{
-			public String filename;
-			public int line;
-			public PauseEvent(String filename, int lineCount) {
-				this.filename = filename;
-				this.line = lineCount;
-			}
-		}
-
-		void onPause(PauseEvent e);
-	}
-
-	@Override
+    @Override
 	public void onPause(final PauseEvent callback){
 	}
 
@@ -68,12 +54,12 @@ public class TitaniumAndroidDebugger implements TitaniumDebugger {
 	}
 
 
-	public void setEventListener(EventCallbacks callbacks){
+	public void setEventListener(EventCallbackTest callbacks){
 		_queue.on("break", new AndroidDataQueue.EventCallback() {
 			@Override
 			public void event(Map body) {
 				Map s = (Map) body.get("script");
-				EventCallbacks.PauseEvent e = new EventCallbacks.PauseEvent((String)s.get("name"), ((Number) body.get("sourceLine")).intValue());
+				EventCallbackTest.PauseEvent e = new EventCallbackTest.PauseEvent((String)s.get("name"), ((Number) body.get("sourceLine")).intValue());
 				callbacks.onPause(e);
 			}
 		});
