@@ -8,8 +8,7 @@ apply plugin: 'signing'
 
 group = 'com.github.betterti'
 archivesBaseName = 'ti-debugger-cli'
-version = '0.0.0-SNAPSHOT'
-
+version = rootProject.version
 ext{
 
     if(System.getenv("ossrhUsername")){

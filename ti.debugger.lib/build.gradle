@@ -7,8 +7,8 @@ apply plugin: 'signing'
 
 
 group = 'com.github.betterti'
-archivesBaseName = 'ti-debugger'
-version = '0.0.0-SNAPSHOT'
+archivesBaseName = 'ti-debugger.lib'
+version = rootProject.version
 
 ext{
 
@@ -98,7 +98,7 @@ uploadArchives {
             }
 
             pom.project {
-                name 'Titani`um Debugger'
+                name 'Titanium Debugger Library'
                 packaging 'jar'
                 // optionally artifactId can be defined here
 
