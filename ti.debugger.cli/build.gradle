@@ -34,7 +34,7 @@ gradle.taskGraph.whenReady { taskGraph ->
 
     if(System.getenv("SECRET_KEY_PASSWORD")){
         println "Decrypting secret key for signing"
-        ext."signing.secretKeyRingFile" = "local.secring.gpg"
+        ext."signing.secretKeyRingFile" = "$rootProject.projectDir/local.secring.gpg"
     }
 }
 
