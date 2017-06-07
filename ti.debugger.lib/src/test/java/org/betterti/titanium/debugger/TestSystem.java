@@ -2,6 +2,7 @@ package org.betterti.titanium.debugger;
 
 
 import org.apache.commons.io.IOUtils;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.File;
@@ -16,6 +17,7 @@ import java.util.List;
 public class TestSystem {
 
   @Test
+  @Ignore
   public void test() throws IOException, InterruptedException {
 
     TitaniumAndroidDebugger debugger = new TitaniumAndroidDebugger();
