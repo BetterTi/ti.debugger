@@ -18,11 +18,11 @@ public class DefaultPendingCommandList implements PendingCommandList {
 
     @Override
     public PendingCommand get(long commandId) {
-        return null;
+        return _commandMap.get(commandId);
     }
 
     @Override
     public void remove(long commandId) {
-
+        _commandMap.remove(commandId);
     }
 }

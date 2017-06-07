@@ -1,16 +1,16 @@
 package com.betterti.titanium.debugger.cli;
 
 import org.betterti.titanium.debugger.BaseDebugger;
+import org.betterti.titanium.debugger.Debugger;
 import org.betterti.titanium.debugger.EventCallbackTest;
 import org.betterti.titanium.debugger.TitaniumAndroidDebugger;
 import org.betterti.titanium.debugger.api.FrameResult;
 import org.betterti.titanium.debugger.api.FramesCallback;
 import org.betterti.titanium.debugger.formatters.IosCommandSerializer;
 import org.betterti.titanium.debugger.receivers.IosCommandReceiver;
+import org.betterti.titanium.debugger.responses.*;
 
 import java.io.*;
-import java.net.ServerSocket;
-import java.net.Socket;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
@@ -36,6 +36,14 @@ public class Main {
 
     int i = 0;
 
+    d.listen(ResumeResponse.class, response -> {
+      System.out.println("resumed");
+    });
+
+    d.listen(SuspendedResponse.class, response -> {
+      System.out.println("system paused: breakpoint reached: " + response.getFilename() + ":" + response.getLineNumber());
+    });
+
     BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
     String line;
     while((line = reader.readLine()) != null && !Thread.interrupted() && !shutdown){
@@ -45,11 +53,33 @@ public class Main {
         line = line.substring(BREAKPOINT_CMD.length()).trim();
         if(line.startsWith(BREAKPOINT_ADD_CMD)){
           line = line.substring(BREAKPOINT_ADD_CMD.length()).trim();
-          d.createBreakpoint("/app.js",131);
-          System.out.println("breakpoint added");
+          String[] parts = line.split(" ");
+          d.createBreakpoint(parts[0],Integer.parseInt(parts[1])).onDone(new Debugger.Callback<BreakpointCreatedResponse>() {
+            @Override
+            public void onResponse(BreakpointCreatedResponse respond) {
+              System.out.println("breakpoint added " + parts[0] + ":" + parts[1]);
+            }
+          });
         }
       }
+      if(line.startsWith("version")){
+        d.queryVersion().onDone(new Debugger.Callback<VersionInfoResponse>() {
+          @Override
+          public void onResponse(VersionInfoResponse respond) {
+            System.out.println("version: " + respond.getVersionName());
+          }
+        });
+      }
       if(line.startsWith("frames")){
+        d.queryFrames().onDone(new Debugger.Callback<FramesResponse>() {
+          @Override
+          public void onResponse(FramesResponse respond) {
+            System.out.println("frames: ");
+            for(FramesResponse.Frame f : respond.getFrames()){
+              System.out.println("\t" + f.index + ":" + f.functionName + ":" + f.file + ":" + f.lineNumber);
+            }
+          }
+        });
 //        androidDebugger.fetchFrames(new FramesCallback() {
 //          @Override
 //          public void event(List<FrameResult> results) {
@@ -59,25 +89,51 @@ public class Main {
 //            }
 //          }
 //        });
+      } else if (line.startsWith("frame")) {
+        line = line.substring("frame".length()).trim();
+        if(line.startsWith("vars")) {
+          line = line.substring("vars".length()).trim();
+          d.queryFrameVariables(Integer.parseInt(line)).onDone(new Debugger.Callback<FrameVariablesResponse>() {
+            @Override
+            public void onResponse(FrameVariablesResponse respond) {
+              System.out.println("variables");
+              for(FrameVariablesResponse.Variable v : respond.getVariables()){
+                System.out.println("\t" + v.type + " " + v.name + " = " + v.value);
+              }
+            }
+          });
+        }
       }
       if(line.startsWith("step")){
         line = line.substring("step".length()).trim();
         if(line.trim().equals("over")){
-          d.stepOver().waitFor();
-          System.out.println("stepped over");
+          d.stepOver().onDone(new Debugger.Callback<NoResponse>() {
+            @Override
+            public void onResponse(NoResponse respond) {
+              System.out.println("stepped over");
+            }
+          });
         }
         if(line.trim().equals("into")){
-          d.stepInto().waitFor();
-          System.out.println("stepped into");
+          d.stepInto().onDone(new Debugger.Callback<NoResponse>() {
+            @Override
+            public void onResponse(NoResponse respond) {
+              System.out.println("stepped into");
+            }
+          });
         }
         if(line.trim().equals("out")){
-          d.stepReturn().waitFor();
-          System.out.println("stepped out");
+          d.stepReturn().onDone(new Debugger.Callback<NoResponse>() {
+            @Override
+            public void onResponse(NoResponse respond) {
+              System.out.println("stepped out");
+
+            }
+          });
         }
       }
       if(line.startsWith(RESUME_CMD)){
         d.resume().waitFor();
-        System.out.println("resumed");
       }
       if(line.startsWith(DISCONNECT_CMD)){
         d.disconnect().waitFor();

@@ -1,10 +1,7 @@
 package com.betterti.titanium.debugger.formatters;
 
 import org.betterti.titanium.debugger.DebugCommand;
-import org.betterti.titanium.debugger.commands.BreakpointCreateCommand;
-import org.betterti.titanium.debugger.commands.OptionCommand;
-import org.betterti.titanium.debugger.commands.ResumeCommand;
-import org.betterti.titanium.debugger.commands.VersionInfoCommand;
+import org.betterti.titanium.debugger.commands.*;
 import org.betterti.titanium.debugger.formatters.IosCommandSerializer;
 import org.junit.Test;
 
@@ -17,7 +14,7 @@ public class TestIosCommandFormatter {
 
 
     @Test
-    public void test_version_serialize(){
+    public void test_version_serialize() throws Exception {
         IosCommandSerializer formatter = new IosCommandSerializer();
 
         DebugCommand version = new VersionInfoCommand();
@@ -29,7 +26,7 @@ public class TestIosCommandFormatter {
         );
     }
     @Test
-    public void test_ios_command_step_filters_formatter(){
+    public void test_ios_command_step_filters_formatter() throws Exception {
         IosCommandSerializer formatter = new IosCommandSerializer();
 
 
@@ -63,7 +60,7 @@ public class TestIosCommandFormatter {
     }
 
     @Test
-    public void test_breakpoint_formatter(){
+    public void test_breakpoint_formatter() throws Exception {
         IosCommandSerializer formatter = new IosCommandSerializer();
 
         DebugCommand c = new BreakpointCreateCommand("/app.js", 44);
@@ -72,11 +69,51 @@ public class TestIosCommandFormatter {
     }
 
     @Test
-    public void test_resume_command(){
+    public void test_resume_command() throws Exception {
         IosCommandSerializer formatter = new IosCommandSerializer();
 
         DebugCommand c = new ResumeCommand();
         assertEquals("22*" + c.getId() + "*resume*0",
+                formatter.serialize(c));
+    }
+    @Test
+    public void test_frames_command() throws Exception {
+        IosCommandSerializer formatter = new IosCommandSerializer();
+
+        DebugCommand c = new FramesCommand();
+        assertEquals("22*" + c.getId() + "*frames*0",
+                formatter.serialize(c));
+    }
+    @Test
+    public void test_frame_variables_command() throws Exception {
+        IosCommandSerializer formatter = new IosCommandSerializer();
+
+        DebugCommand c = new FrameVariablesCommand(5);
+        assertEquals("34*" + c.getId() + "*variables*0*frame[5]",
+                formatter.serialize(c));
+    }
+    @Test
+    public void test_stepover() throws Exception {
+        IosCommandSerializer formatter = new IosCommandSerializer();
+
+        DebugCommand c = new StepOverCommand();
+        assertEquals("22*" + c.getId() + "*stepOver",
+                formatter.serialize(c));
+    }
+    @Test
+    public void test_stepin() throws Exception {
+        IosCommandSerializer formatter = new IosCommandSerializer();
+
+        DebugCommand c = new StepIntoCommand();
+        assertEquals("22*" + c.getId() + "*stepInto",
+                formatter.serialize(c));
+    }
+    @Test
+    public void test_stepout() throws Exception {
+        IosCommandSerializer formatter = new IosCommandSerializer();
+
+        DebugCommand c = new StepReturnCommand();
+        assertEquals("24*" + c.getId() + "*stepReturn",
                 formatter.serialize(c));
     }
 }

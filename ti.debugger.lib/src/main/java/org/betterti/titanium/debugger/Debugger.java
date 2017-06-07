@@ -13,7 +13,7 @@ public interface Debugger {
 
     PendingCommand<SimpleResponse> disconnect();
 
-    PendingCommand<SimpleResponse> stepReturn();
+    PendingCommand<NoResponse> stepReturn();
 
     interface Callback<T extends DebugResponse>{
 
@@ -26,13 +26,17 @@ public interface Debugger {
 
     PendingCommand<VersionInfoResponse> queryVersion();
 
+    PendingCommand<FramesResponse> queryFrames();
+
+    PendingCommand<FrameVariablesResponse> queryFrameVariables(int frameNumber);
+
     PendingCommand<BreakpointCreatedResponse> createBreakpoint(String filename, int lineNumber);
 
     PendingCommand<NoResponse> resume();
 
-    PendingCommand<SimpleResponse> stepOver();
+    PendingCommand<NoResponse> stepOver();
 
-    PendingCommand<SimpleResponse> stepInto();
+    PendingCommand<NoResponse> stepInto();
 
     <T extends DebugResponse> void listen(Class<T> clazz, Callback<T> callback);
 

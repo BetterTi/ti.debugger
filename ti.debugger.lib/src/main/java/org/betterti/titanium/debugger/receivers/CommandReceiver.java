@@ -17,7 +17,7 @@ public interface CommandReceiver {
 
     Socket connect() throws IOException;
 
-    DebugResponse readNextCommand(InputStream is, PendingCommandList list) throws IOException;
+    DebugResponse readNextCommand(InputStream is, PendingCommandList list) throws Exception;
 
 
     List<DebugCommand> getInitialCommands();

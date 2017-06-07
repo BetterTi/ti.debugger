@@ -17,6 +17,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadFactory;
 
 /**
  * Created by johnsba1 on 5/29/17.
@@ -27,7 +28,14 @@ public class BaseDebugger implements Debugger {
 
 
     private ExecutorService _outputWorker = Executors.newSingleThreadExecutor();
-    private ExecutorService _inputWorker = Executors.newSingleThreadExecutor();
+    private ExecutorService _inputWorker = Executors.newSingleThreadExecutor(new ThreadFactory() {
+        @Override
+        public Thread newThread(Runnable r) {
+            Thread t = new Thread(r);
+            t.setName("debugger-input-reader");
+            return t;
+        }
+    });
     private PendingCommandList _list = new DefaultPendingCommandList();
     private static Map<Class<? extends DebugResponse>, List<Callback<? extends DebugResponse>>> _responseCallbacks = new HashMap<>();
 
@@ -49,7 +57,7 @@ public class BaseDebugger implements Debugger {
     }
 
     @Override
-    public PendingCommand<SimpleResponse> stepReturn() {
+    public PendingCommand<NoResponse> stepReturn() {
         return send(new StepReturnCommand());
     }
 
@@ -65,9 +73,19 @@ public class BaseDebugger implements Debugger {
                     try {
                         DebugResponse r = _commandReceiver.readNextCommand(_inputStream, _list);
                         if(r.getId() != null){
+                            PendingCommand c = _list.get(r.getId());
+                            if(c != null){
+                                c.finish(r);
+                            }
                             _list.remove(r.getId());
                         }
-                    } catch (IOException e) {
+                        else{
+                            for(Callback c :_responseCallbacks.getOrDefault(r.getClass(), new ArrayList<>())){
+                                c.onResponse(r);
+                            }
+                        }
+
+                    } catch (Exception e) {
                         e.printStackTrace();
                     }
                 }
@@ -83,6 +101,19 @@ public class BaseDebugger implements Debugger {
     }
 
     @Override
+    public PendingCommand<FramesResponse> queryFrames(){
+        Log.debug("Issuing frames query command");
+        return send(new FramesCommand());
+    }
+
+
+    @Override
+    public PendingCommand<FrameVariablesResponse> queryFrameVariables(int frameNumber){
+        Log.debug("Issuing frames query command");
+        return send(new FrameVariablesCommand(frameNumber));
+    }
+
+    @Override
     public PendingCommand<BreakpointCreatedResponse> createBreakpoint(String filename, int lineNumber){
         Log.debug("Issuing create breakpoint command: {}:{}", filename, lineNumber);
         return send(new BreakpointCreateCommand(filename, lineNumber));
@@ -95,29 +126,28 @@ public class BaseDebugger implements Debugger {
     }
 
     @Override
-    public PendingCommand<SimpleResponse> stepOver(){
+    public PendingCommand<NoResponse> stepOver(){
         Log.debug("Issuing step over command");
         return send(new StepOverCommand());
     }
 
     @Override
-    public PendingCommand<SimpleResponse> stepInto(){
+    public PendingCommand<NoResponse> stepInto(){
         Log.debug("Issuing step into command");
         return send(new StepIntoCommand());
     }
 
     private <T extends DebugCommand<TR>, TR extends DebugResponse> PendingCommand<TR> send(T command) {
         PendingCommand c = new PendingCommand<>(command);
+        _list.put(c);
         _outputWorker.submit(new Runnable() {
             @Override
             public void run() {
-                PendingCommand c = new PendingCommand<>(command);
                 try {
-                    _list.put(c);
                     String serialized = _commandSerializer.serialize(c.getCommand());
                     Log.trace("Command of type {} serialized to {}", command.getClass(), serialized);
                     _outputStream.write(serialized.getBytes());
-                } catch (IOException e) {
+                } catch (Exception e) {
                     e.printStackTrace();
                 }
             }

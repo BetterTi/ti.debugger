@@ -1,19 +1,18 @@
 package org.betterti.titanium.debugger.formatters;
 
 import org.betterti.titanium.debugger.DebugCommand;
-import org.betterti.titanium.debugger.commands.BreakpointCreateCommand;
-import org.betterti.titanium.debugger.commands.OptionCommand;
-import org.betterti.titanium.debugger.commands.ResumeCommand;
-import org.betterti.titanium.debugger.commands.VersionInfoCommand;
+import org.betterti.titanium.debugger.commands.*;
 
 /**
  * Created by johnsba1 on 5/29/17.
  */
 public class IosCommandSerializer implements CommandSerializer {
     @Override
-    public String serialize(DebugCommand c) {
+    public String serialize(DebugCommand c) throws Exception {
 
-        String content = c.getId() + "";
+        String content = "";
+
+
 
         if(c instanceof VersionInfoCommand){
             content += "*version";
@@ -29,6 +28,30 @@ public class IosCommandSerializer implements CommandSerializer {
         if(c instanceof ResumeCommand){
             content += "*resume*0";
         }
+        if(c instanceof FramesCommand){
+            content += "*frames*0";
+        }
+        if(c instanceof FrameVariablesCommand){
+            content += "*variables*0*frame["  + ((FrameVariablesCommand) c).getFrameNumber() + "]";
+        }
+
+        if(c instanceof StepOverCommand){
+            content += "*stepOver";
+        }
+
+        if(c instanceof StepIntoCommand){
+            content += "*stepInto";
+        }
+
+        if(c instanceof StepReturnCommand){
+            content += "*stepReturn";
+        }
+
+        if(content.length() == 0){
+            throw new Exception("No implementation yet for command of type: " + c.getClass());
+        }
+
+        content = c.getId() + content;
 //
 //
 //        + "*" + c.getCommand() +

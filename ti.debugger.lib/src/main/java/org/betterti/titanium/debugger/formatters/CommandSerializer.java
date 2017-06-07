@@ -8,5 +8,5 @@ import org.betterti.titanium.debugger.DebugCommand;
 public interface CommandSerializer {
     
     
-    String serialize(DebugCommand c);
+    String serialize(DebugCommand c) throws Exception;
 }

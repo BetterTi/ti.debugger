@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -31,91 +32,120 @@ public class IosCommandReceiver implements CommandReceiver {
     }
 
     @Override
-    public DebugResponse readNextCommand(InputStream is, PendingCommandList list) throws IOException {
+    public DebugResponse readNextCommand(InputStream is, PendingCommandList list) throws Exception {
 
-        String lengthStr = readUntil('*', is);
+            String lengthStr = readUntil('*', is);
 
-        int length = Integer.parseInt(lengthStr);
+            int length = Integer.parseInt(lengthStr);
 
-        byte[] data = new byte[length];
+            byte[] data = new byte[length];
 
-        int amountRead = 0;
-        while(amountRead < length) {
-            amountRead += is.read(data, amountRead, length - amountRead);
-        }
-        String dataStr = new String(data);
-
-        String[] parts = dataStr.split("\\*");
-
-        String idStr = parts[0];
+            int amountRead = 0;
+            while (amountRead < length) {
+                amountRead += is.read(data, amountRead, length - amountRead);
+            }
+            String dataStr = new String(data);
 
         try {
-            long id = Long.parseLong(idStr);
+            String[] parts = dataStr.split("\\*");
 
-            PendingCommand pending = list.get(id);
-            DebugCommand c = pending.getCommand();
-            DebugResponse r = null;
-            if (c != null) {
+            String idStr = parts[0];
+
+            DebugCommand c = null;
+            Long id = null;
+            try {
+                id = Long.parseLong(idStr);
+
+                PendingCommand pending = list.get(id);
+                c = pending.getCommand();
+            }
+            catch(NumberFormatException e) {
+                Log.trace("ID could not be parsed for this request. It may not have a corresponding command");
+            }
+            if(c != null){
                 if (c instanceof VersionInfoCommand) {
-                    r = new VersionInfoResponse(
+                    return new VersionInfoResponse(
                             id,
                             parts[2]
                     );
                 }
                 if (c instanceof BreakpointCreateCommand) {
-                    r = new BreakpointCreatedResponse(
+                    return new BreakpointCreatedResponse(
                             id
                     );
                 }
                 if (c instanceof OptionCommand) {
-                    r = new SimpleResponse(
+                    return new SimpleResponse(
                             id
                     );
                 }
-                if (c instanceof ResumeCommand) {
-                    r = new ResumeResponse(
-                            id
+                if (c instanceof FramesCommand){
+                    List<FramesResponse.Frame> frames = new ArrayList<>();
+                    for(int i = 1; i < parts.length; i++) {
+                        String[] subparts = parts[i].split("\\|");
+                        frames.add(new FramesResponse.Frame(
+                            Integer.parseInt(subparts[0]),
+                            subparts[1],
+                            subparts[3].replace("app:", ""),
+                            Integer.parseInt(subparts[4])
+                        ));
+                    }
+
+                    return new FramesResponse(
+                            id,
+                            frames
                     );
                 }
-                return r;
+                if (c instanceof FrameVariablesCommand){
+                    List<FrameVariablesResponse.Variable> variables = new ArrayList<>();
+                    for(int i = 1; i < parts.length; i++) {
+                        //label1|object|nol|[object TiUILabel]
+                        String[] subparts = parts[i].split("\\|");
+                        variables.add(new FrameVariablesResponse.Variable(
+                                subparts[0],
+                                subparts[1],
+                                subparts[2],
+                                subparts[3])
+                        );
+                    }
+
+                    return new FrameVariablesResponse(
+                            id,
+                            variables
+                    );
+                }
+            }
+            else{
+                if ("suspended".equals(parts[0])) {
+                    return new SuspendedResponse(
+                            parts[2],
+                            parts[3],
+                            Integer.parseInt(parts[4])
+                    );
+                }
+                if ("log".equals(parts[0])) {
+                    return new LogResponse(
+                            parts[1],
+                            parts[2]
+                    );
+                }
+                if ("resumed".equals(parts[0])) {
+                    return new ResumeResponse(
+                            Integer.parseInt(parts[1]),
+                            parts[2]
+                    );
+                }
+
             }
         }
-        catch(NumberFormatException e){
-            if("suspended".equals(parts[0]) && parts.length > 3 && "breakpoint".equals(parts[2])){
-                return new BreakpointReachedResponse(
-                        parts[3],
-                        Integer.parseInt(parts[4])
-                );
-            }
+        catch (Exception e){
+            throw new Exception("Encountered an error parsing the incoming response: " + lengthStr + "*" + dataStr, e);
+
         }
+        throw new Exception("No response could be created for: " + lengthStr + "*" + dataStr);
 
 
 
-
-//        Map<String, String> customData = new HashMap<>();
-//        if(parts.length > 1){
-//            if("created".equals(parts[1])){
-//                customData.put("type", "breakpoint");
-//                customData.put("result", "created");
-//            }
-//            if("suspended".equals(parts[0]) && parts.length == 5 && "breakpoint".equals(parts[2])){
-//                customData.put("type", "suspended");
-//                customData.put("filename", parts[3]);
-//                customData.put("lineNumber", parts[4]);
-//            }
-//            else{
-//                id = parts[0];
-//            }
-//
-//        }
-
-//        DebugResponse r = new DebugResponse(id, customData);
-
-
-
-
-
-        return null;
     }
 
     @Override
