@@ -34,8 +34,8 @@ gradle.taskGraph.whenReady { taskGraph ->
 
     if(System.getenv("SECRET_KEY_PASSWORD")){
         println "Decrypting secret key for signing"
-        ["openssl", "enc", "-in", "secring.gpg.enc", "-out", "secring.gpg.out", "-d", "-aes256", "-k", System.getenv("SECRET_KEY_PASSWORD")].execute().waitFor();
-        ext."signing.secretKeyRingFile" = "secring.gpg.out"
+//        ["openssl", "enc", "-in", "secring.gpg.enc", "-out", "secring.gpg.out", "-d", "-aes256", "-k", System.getenv("SECRET_KEY_PASSWORD")].execute().waitFor();
+        ext."signing.secretKeyRingFile" = "local.secring.gpg"
     }
 
 
