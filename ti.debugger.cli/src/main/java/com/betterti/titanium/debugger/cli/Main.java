@@ -6,7 +6,11 @@ import org.betterti.titanium.debugger.EventCallbackTest;
 import org.betterti.titanium.debugger.TitaniumAndroidDebugger;
 import org.betterti.titanium.debugger.api.FrameResult;
 import org.betterti.titanium.debugger.api.FramesCallback;
+import org.betterti.titanium.debugger.formatters.AndroidCommandSerializer;
 import org.betterti.titanium.debugger.formatters.IosCommandSerializer;
+import org.betterti.titanium.debugger.receivers.AndroidCommandReceiver;
+import org.betterti.titanium.debugger.receivers.BreakpointDatabase;
+import org.betterti.titanium.debugger.receivers.BreakpointDatabaseImpl;
 import org.betterti.titanium.debugger.receivers.IosCommandReceiver;
 import org.betterti.titanium.debugger.responses.*;
 
@@ -22,6 +26,7 @@ public class Main {
 
   public static final String BREAKPOINT_CMD = "breakpoint";
   public static final String BREAKPOINT_ADD_CMD = "add";
+  private static final String BREAKPOINT_REMOVE_CMD = "remove";
 
   public static final String RESUME_CMD = "resume";
   private static final String DISCONNECT_CMD = "disconnect";
@@ -29,7 +34,9 @@ public class Main {
 
   public static void main(String[] arg) throws IOException, ExecutionException, InterruptedException {
 
-    BaseDebugger d = new BaseDebugger(new IosCommandReceiver(), new IosCommandSerializer());
+//    BaseDebugger d = new BaseDebugger(new IosCommandReceiver(), new IosCommandSerializer());
+    BreakpointDatabase db = new BreakpointDatabaseImpl();
+    BaseDebugger d  = new BaseDebugger(new AndroidCommandReceiver(db), new AndroidCommandSerializer(db));
 
     d.connect();
 
@@ -61,6 +68,17 @@ public class Main {
             }
           });
         }
+        if(line.startsWith(BREAKPOINT_REMOVE_CMD)){
+          line = line.substring(BREAKPOINT_REMOVE_CMD.length()).trim();
+          String[] parts = line.split(" ");
+          d.removeBreakpoint(parts[0],Integer.parseInt(parts[1])).onDone(new Debugger.Callback<SimpleResponse>() {
+            @Override
+            public void onResponse(SimpleResponse respond) {
+              System.out.println("breakpoint removed");
+            }
+          });
+
+        }
       }
       if(line.startsWith("version")){
         d.queryVersion().onDone(new Debugger.Callback<VersionInfoResponse>() {
@@ -80,15 +98,6 @@ public class Main {
             }
           }
         });
-//        androidDebugger.fetchFrames(new FramesCallback() {
-//          @Override
-//          public void event(List<FrameResult> results) {
-//            System.out.println("Frames fetched");
-//            for(FrameResult r : results){
-//              System.out.println("\t" + r.fileName + ":" + r.funcName + ":" + r.line);
-//            }
-//          }
-//        });
       } else if (line.startsWith("frame")) {
         line = line.substring("frame".length()).trim();
         if(line.startsWith("vars")) {

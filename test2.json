@@ -1,0 +1,190 @@
+{
+  "seq": 4,
+  "request_seq": 1497064721988,
+  "type": "response",
+  "command": "backtrace",
+  "success": true,
+  "body": {
+    "fromFrame": 0,
+    "toFrame": 4,
+    "totalFrames": 4,
+    "frames": [
+      {
+        "type": "frame",
+        "index": 0,
+        "receiver": {
+          "ref": 1,
+          "type": "object",
+          "className": "global"
+        },
+        "func": {
+          "ref": 0,
+          "type": "function",
+          "name": "",
+          "inferredName": "anotherAssigned",
+          "scriptId": 37
+        },
+        "script": {
+          "ref": 7
+        },
+        "constructCall": false,
+        "atReturn": false,
+        "debuggerFrame": false,
+        "arguments": [],
+        "locals": [],
+        "position": 1512,
+        "line": 85,
+        "column": 4,
+        "sourceLineText": "    console.log(\"INSIDE ANOTHER ASSIGNED\")",
+        "scopes": [
+          {
+            "type": 1,
+            "index": 0
+          },
+          {
+            "type": 0,
+            "index": 1
+          }
+        ],
+        "text": "#00 [anonymous]() app.js line 86 column 5 (position 1513)"
+      },
+      {
+        "type": "frame",
+        "index": 1,
+        "receiver": {
+          "ref": 1,
+          "type": "object",
+          "className": "global"
+        },
+        "func": {
+          "ref": 8,
+          "type": "function",
+          "name": "",
+          "inferredName": "onceMore",
+          "scriptId": 37
+        },
+        "script": {
+          "ref": 7
+        },
+        "constructCall": false,
+        "atReturn": false,
+        "debuggerFrame": false,
+        "arguments": [],
+        "locals": [],
+        "position": 1452,
+        "line": 81,
+        "column": 4,
+        "sourceLineText": "    anotherAssigned();",
+        "scopes": [
+          {
+            "type": 1,
+            "index": 0
+          },
+          {
+            "type": 0,
+            "index": 1
+          }
+        ],
+        "text": "#01 [anonymous]() app.js line 82 column 5 (position 1453)"
+      },
+      {
+        "type": "frame",
+        "index": 2,
+        "receiver": {
+          "ref": 1,
+          "type": "object",
+          "className": "global"
+        },
+        "func": {
+          "ref": 9,
+          "type": "function",
+          "name": "insideAnother",
+          "inferredName": "",
+          "scriptId": 37
+        },
+        "script": {
+          "ref": 7
+        },
+        "constructCall": false,
+        "atReturn": false,
+        "debuggerFrame": false,
+        "arguments": [],
+        "locals": [],
+        "position": 1333,
+        "line": 74,
+        "column": 4,
+        "sourceLineText": "    onceMore();",
+        "scopes": [
+          {
+            "type": 1,
+            "index": 0
+          },
+          {
+            "type": 0,
+            "index": 1
+          }
+        ],
+        "text": "#02 insideAnother() app.js line 75 column 5 (position 1334)"
+      },
+      {
+        "type": "frame",
+        "index": 3,
+        "receiver": {
+          "ref": 10,
+          "type": "object",
+          "className": "Titanium"
+        },
+        "func": {
+          "ref": 11,
+          "type": "function",
+          "name": "",
+          "inferredName": "onceMore",
+          "scriptId": 37
+        },
+        "script": {
+          "ref": 7
+        },
+        "constructCall": false,
+        "atReturn": false,
+        "debuggerFrame": false,
+        "arguments": [],
+        "locals": [],
+        "position": 1241,
+        "line": 69,
+        "column": 4,
+        "sourceLineText": "    insideAnother()",
+        "scopes": [
+          {
+            "type": 1,
+            "index": 0
+          },
+          {
+            "type": 0,
+            "index": 1
+          }
+        ],
+        "text": "#03 #<Titanium>.[anonymous]() app.js line 70 column 5 (position 1242)"
+      }
+    ]
+  },
+  "refs": [
+    {
+      "handle": 7,
+      "type": "script",
+      "name": "app.js",
+      "id": 37,
+      "lineOffset": 0,
+      "columnOffset": 0,
+      "lineCount": 87,
+      "sourceStart": "// this sets the background color of the master UIView (when there are no window",
+      "sourceLength": 1552,
+      "scriptType": 2,
+      "compilationType": 0,
+      "context": {
+        "ref": 6
+      },
+      "text": "app.js (lines: 87)"
+    }
+  ],
+  "running": false
+}

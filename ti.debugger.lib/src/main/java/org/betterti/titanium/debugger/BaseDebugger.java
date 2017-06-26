@@ -62,6 +62,11 @@ public class BaseDebugger implements Debugger {
     }
 
     @Override
+    public PendingCommand<SimpleResponse> removeBreakpoint(String filename, int linenumber) {
+        return send(new BreakpointRemoveCommand(filename, linenumber));
+    }
+
+    @Override
     public void connect() throws IOException {
         _socket = _commandReceiver.connect();
         _inputStream = _socket.getInputStream();

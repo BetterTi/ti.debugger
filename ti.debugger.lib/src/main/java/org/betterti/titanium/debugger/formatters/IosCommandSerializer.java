@@ -25,6 +25,10 @@ public class IosCommandSerializer implements CommandSerializer {
             BreakpointCreateCommand oc = (BreakpointCreateCommand) c;
             content += "*breakpoint*create*app:" + oc.getFilename() + "*" + oc.getLineNumber() + "*1*0**1";
         }
+        if(c instanceof BreakpointRemoveCommand){
+            BreakpointRemoveCommand oc = (BreakpointRemoveCommand) c;
+            content += "*breakpoint*remove*app:" + oc.getFilename() + "*" + oc.getLineNumber();
+        }
         if(c instanceof ResumeCommand){
             content += "*resume*0";
         }

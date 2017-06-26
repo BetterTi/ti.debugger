@@ -79,4 +79,9 @@ function insideAnother(){
 
 var onceMore = function(){
     console.log("INSIDE ONE MORE!!!")
+    anotherAssigned();
+}
+
+var anotherAssigned = function(){
+    console.log("INSIDE ANOTHER ASSIGNED")
 }

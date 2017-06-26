@@ -15,6 +15,8 @@ public interface Debugger {
 
     PendingCommand<NoResponse> stepReturn();
 
+    PendingCommand<SimpleResponse> removeBreakpoint(String filename, int linenumber);
+
     interface Callback<T extends DebugResponse>{
 
         void onResponse(T respond);

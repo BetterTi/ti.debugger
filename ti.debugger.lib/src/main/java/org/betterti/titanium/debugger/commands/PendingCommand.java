@@ -30,6 +30,8 @@ public class PendingCommand<TR extends DebugResponse>{
     }
 
 
+
+
     public synchronized void finish(TR result){
          _result = result;
          if(_callbackList != null){

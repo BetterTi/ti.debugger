@@ -10,7 +10,7 @@ import static org.junit.Assert.assertEquals;
 /**
  * Created by johnsba1 on 5/29/17.
  */
-public class TestIosCommandFormatter {
+public class TestIosCommandSerializer {
 
 
     @Test
@@ -65,6 +65,15 @@ public class TestIosCommandFormatter {
 
         DebugCommand c = new BreakpointCreateCommand("/app.js", 44);
         assertEquals("53*" + c.getId() + "*breakpoint*create*app:/app.js*44*1*0**1",
+                formatter.serialize(c));
+    }
+
+    @Test
+    public void test_remove_breakpoint_formatter() throws Exception {
+        IosCommandSerializer formatter = new IosCommandSerializer();
+
+        DebugCommand c = new BreakpointRemoveCommand("/app.js", 44);
+        assertEquals("46*" + c.getId() + "*breakpoint*remove*app:/app.js*44",
                 formatter.serialize(c));
     }
 
