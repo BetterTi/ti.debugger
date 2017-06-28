@@ -11,6 +11,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.URI;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -86,7 +88,7 @@ public class IosCommandReceiver implements CommandReceiver {
                         frames.add(new FramesResponse.Frame(
                             Integer.parseInt(subparts[0]),
                             subparts[1],
-                            subparts[3].replace("app:", ""),
+                            new URI(subparts[3]),
                             Integer.parseInt(subparts[4])
                         ));
                     }

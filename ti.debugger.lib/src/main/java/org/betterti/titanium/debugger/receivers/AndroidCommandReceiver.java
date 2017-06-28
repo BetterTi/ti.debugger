@@ -13,6 +13,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.Socket;
+import java.net.URI;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -117,13 +119,20 @@ public class AndroidCommandReceiver implements CommandReceiver {
                         }
                         String text = getStr(incomingFrame, "text");
                         String func = text.split("\\s")[1];
-                        System.out.println(Arrays.toString(func.split("\\s")));
-//                        String func = frontFuncPart.substring(frontFuncPart.indexOf(' ')).trim();
-                        System.out.println(text);
+
+
+                        String functionFilePath = getStr(scriptRef, "name");
+                        URI functionUri;
+                        if(functionFilePath.startsWith("ti:")){
+                            functionUri = new URI( functionFilePath);
+                        }
+                        else{
+                            functionUri =  new URI("app:/" + functionFilePath);
+                        }
                         frames.add(new FramesResponse.Frame(
                                 i,
                                 func,
-                                "/" + getStr(scriptRef,"name"),
+                                functionUri,
                                 getInt(incomingFrame,"line")));
                         i++;
                     }

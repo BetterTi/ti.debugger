@@ -105,7 +105,28 @@ public class TestAndroidReceiver {
         assertEquals(3, response.getFrames().size());
         assertEquals(0, response.getFrames().get(0).index);
         assertEquals("[anonymous]()", response.getFrames().get(0).functionName);
-        assertEquals("/app.js", response.getFrames().get(0).file);
+        assertEquals("app:/app.js", response.getFrames().get(0).file.toString());
+        assertEquals(81, response.getFrames().get(0).lineNumber);
+        assertEquals("#<Titanium>.[anonymous]()" , response.getFrames().get(2).functionName);
+    }
+
+    @Test
+    public void test_frames_response_with_a_ti_module_js_frame_in_it() throws Exception {
+        PendingCommandList l = mock(PendingCommandList.class);
+
+
+        when(l.get(eq(1497035630619L))).thenReturn(mockPendingCommand(FramesCommand.class));
+
+        String json = "{\"seq\":4,\"request_seq\":1497035630619,\"type\":\"response\",\"command\":\"backtrace\",\"success\":true,\"body\":{\"fromFrame\":0,\"toFrame\":3,\"totalFrames\":3,\"frames\":[{\"type\":\"frame\",\"index\":0,\"receiver\":{\"ref\":1,\"type\":\"object\",\"className\":\"global\"},\"func\":{\"ref\":0,\"type\":\"function\",\"name\":\"\",\"inferredName\":\"onceMore\",\"scriptId\":37},\"script\":{\"ref\":7},\"constructCall\":false,\"atReturn\":true,\"returnValue\":{\"ref\":2,\"type\":\"undefined\"},\"debuggerFrame\":false,\"arguments\":[],\"locals\":[],\"position\":1448,\"line\":81,\"column\":0,\"sourceLineText\":\"}\",\"scopes\":[{\"type\":1,\"index\":0},{\"type\":0,\"index\":1}],\"text\":\"#00 [anonymous]() returning undefined app.js line 82 column 1 (position 1449)\"},{\"type\":\"frame\",\"index\":1,\"receiver\":{\"ref\":1,\"type\":\"object\",\"className\":\"global\"},\"func\":{\"ref\":8,\"type\":\"function\",\"name\":\"insideAnother\",\"inferredName\":\"\",\"scriptId\":37},\"script\":{\"ref\":7},\"constructCall\":false,\"atReturn\":false,\"debuggerFrame\":false,\"arguments\":[],\"locals\":[],\"position\":1333,\"line\":74,\"column\":4,\"sourceLineText\":\"    onceMore();\",\"scopes\":[{\"type\":1,\"index\":0},{\"type\":0,\"index\":1}],\"text\":\"#01 insideAnother() app.js line 75 column 5 (position 1334)\"},{\"type\":\"frame\",\"index\":2,\"receiver\":{\"ref\":9,\"type\":\"object\",\"className\":\"Titanium\"},\"func\":{\"ref\":10,\"type\":\"function\",\"name\":\"\",\"inferredName\":\"onceMore\",\"scriptId\":37},\"script\":{\"ref\":7},\"constructCall\":false,\"atReturn\":false,\"debuggerFrame\":false,\"arguments\":[],\"locals\":[],\"position\":1241,\"line\":69,\"column\":4,\"sourceLineText\":\"    insideAnother()\",\"scopes\":[{\"type\":1,\"index\":0},{\"type\":0,\"index\":1}],\"text\":\"#02 #<Titanium>.[anonymous]() app.js line 70 column 5 (position 1242)\"}]},\"refs\":[{\"handle\":7,\"type\":\"script\",\"name\":\"ti:/module.js\",\"id\":37,\"lineOffset\":0,\"columnOffset\":0,\"lineCount\":82,\"sourceStart\":\"// this sets the background color of the master UIView (when there are no window\",\"sourceLength\":1449,\"scriptType\":2,\"compilationType\":0,\"context\":{\"ref\":6},\"text\":\"app.js (lines: 82)\"}],\"running\":false}";
+        ByteArrayInputStream bais = new ByteArrayInputStream(("Content-Length:" + json.length() + "\r\n\r\n" + json).getBytes());
+
+        AndroidCommandReceiver r = new AndroidCommandReceiver(mock(BreakpointDatabase.class));
+        FramesResponse response = (FramesResponse) r.readNextCommand(bais, l);
+        assertEquals(Long.valueOf(1497035630619L), response.getId());
+        assertEquals(3, response.getFrames().size());
+        assertEquals(0, response.getFrames().get(0).index);
+        assertEquals("[anonymous]()", response.getFrames().get(0).functionName);
+        assertEquals("ti:/module.js", response.getFrames().get(0).file.toString());
         assertEquals(81, response.getFrames().get(0).lineNumber);
         assertEquals("#<Titanium>.[anonymous]()" , response.getFrames().get(2).functionName);
     }

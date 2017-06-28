@@ -1,5 +1,7 @@
 package org.betterti.titanium.debugger.responses;
 
+import java.net.URI;
+import java.net.URL;
 import java.util.List;
 
 /**
@@ -10,10 +12,10 @@ public class FramesResponse extends DebugResponse {
     public static class Frame{
         public final int index;
         public final String functionName;
-        public final String file;
+        public final URI file;
         public final int lineNumber;
 
-        public Frame(int index, String functionName, String file, int lineNumber) {
+        public Frame(int index, String functionName, URI file, int lineNumber) {
             this.index = index;
             this.functionName = functionName;
             this.file = file;

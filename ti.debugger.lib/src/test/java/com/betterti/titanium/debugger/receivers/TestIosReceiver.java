@@ -100,7 +100,7 @@ public class TestIosReceiver {
         assertEquals(3, response.getFrames().size());
         assertEquals(0, response.getFrames().get(0).index);
         assertEquals("onceMore", response.getFrames().get(0).functionName);
-        assertEquals("/app.js", response.getFrames().get(0).file);
+        assertEquals("app:/app.js", response.getFrames().get(0).file.toString());
         assertEquals(81, response.getFrames().get(0).lineNumber);
         assertEquals("" , response.getFrames().get(2).functionName);
     }
